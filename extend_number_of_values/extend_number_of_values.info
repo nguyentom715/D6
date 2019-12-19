@@ -1,0 +1,4 @@
+name =  Extend number of value 
+package = "custom"
+version = VERSION
+core = 6.x

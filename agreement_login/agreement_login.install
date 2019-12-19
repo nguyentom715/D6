@@ -1,0 +1,53 @@
+<?php
+/**
+ * Implements hook_login_enable().
+ */
+function agreement_login_enable()
+{
+    drupal_install_schema('agreement_login');
+}
+
+/**
+ * Implements hook_login_schema().
+ * Create a expired login table
+ */
+function agreement_login_schema()
+{
+    $schema['agreement_login'] = array(
+        'description' => t('The base table for agree_login.'),
+        'fields' => array(
+            'id' => array(
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'uid' => array(
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE,
+                'default' => 0
+            ),
+            'name' => array(
+                'type' => 'varchar',
+                'length' => 100,
+                'not null' => FALSE,
+                'default' => ''
+            ),
+            'mail' => array(
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => FALSE,
+                'default' => ''
+            ),
+            'expired_date' => array(
+                'type' => 'int',
+                'length' => 20,
+                'not null' => TRUE,
+                'default' => '0'
+            ),
+        ),
+        'primary key' => array('id'),
+    );
+
+    return $schema;
+}

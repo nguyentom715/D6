@@ -1,0 +1,14 @@
+<?php
+/**
+ * Increase the value in selection of fields and multiple group.
+ */
+function extend_number_of_values_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'content_field_edit_form') {
+    $range = drupal_map_assoc(range(1, 20));
+    $new_options =  array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')) + $range;
+  
+    // Change the options
+    $form['field']['multiple']['#options'] = $new_options;
+	$form['field']['multiple']['#title'] ='Number of repeats'; 
+     }
+}

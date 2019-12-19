@@ -1,0 +1,100 @@
+<?php
+/**
+ * Implements agreement_login_user.
+ */
+function agreement_login_user($op, &$edit, &$account, $category = NULL)
+{
+    $isPopup = check_agreement();
+    add_js_setting($isPopup);
+    if ($op == 'login') {
+        redirect_login($isPopup);
+    }
+}
+
+/**
+ * Implements check_agreement().
+ */
+function check_agreement()
+{
+    global $user;
+    $expried_date = db_fetch_object(db_query("SELECT * FROM {agreement_login} WHERE uid = $user->uid"))->expired_date;
+    if ($expried_date === fase || time() > $expried_date)
+        return true;
+    return false;
+}
+
+/**
+ * Implements add_js_setting().
+ */
+function add_js_setting($isPopup)
+{
+    global $base_url;
+    drupal_add_js(drupal_get_path('module', 'agreement_login') . '/js/popup.js');
+    drupal_add_js(
+        array(
+            'baseUrl' => $base_url
+        ),
+        'setting'
+    );
+    drupal_add_js(
+        array(
+            'isPopup' => $isPopup
+        ),
+        'setting'
+    );
+}
+
+/**
+ * Implements redirect_login().
+ */
+function redirect_login($isPopup)
+{
+    unset_destination();
+    if ($isPopup) {
+        drupal_goto('/node/4');
+    }
+    drupal_goto('/node/1'); //welcome page
+}
+
+/**
+ * Implements unset_destination().
+ */
+function unset_destination()
+{
+    if (isset($_GET['destination'])) {
+        unset($_GET['destination']);
+        unset($_REQUEST['destination']);
+    }
+}
+
+/**
+ * Implements agreement_login_menu().
+ */
+function agreement_login_menu()
+{
+    $items = array();
+    // Create a path to send our AJAX request to.
+    $items['mymodule_ajax'] = array(
+        'page callback' => 'mymodule_ajax_callback',
+        'access arguments' => array('access example ajax'),
+        'type' => MENU_CALLBACK,
+        'access callback' => TRUE
+    );
+
+    return $items;
+}
+
+/**
+ * Implements hook_ajax_callback().
+ */
+function mymodule_ajax_callback()
+{
+    global $user;
+    $nextYear =  strtotime("next year");
+    $r = db_query("SELECT * FROM {agreement_login} WHERE uid = $user->uid");
+    if ($r->num_rows == 0) { //first login
+        db_query("INSERT INTO {agreement_login} (uid, name, mail, expired_date)  VALUES ($user->uid, '$user->name', '$user->mail', $nextYear)");
+    } else { // after one year update to next year
+        db_query("UPDATE {agreement_login} SET expired_date= $nextYear WHERE uid= $user->uid");
+    }
+}
